@@ -164,25 +164,27 @@ const WelcomeScreen = ({ onStart, active, forceIdle, onIdleAcknowledged }: Welco
         />
 
         <div className="pill-badge mb-8">
-          Price Check on Aisle F
+          Cherre Data Mart — Point of Sale
         </div>
 
         <div
           className="text-foreground font-black leading-none tracking-tight mb-3"
-          style={{ fontSize: 'clamp(38px, 7vw, 72px)' }}
+          style={{ fontSize: 'clamp(34px, 6vw, 64px)' }}
         >
           Cherre<br /><span className="text-primary">Data Mart</span>
         </div>
 
         <div
-          className="text-foreground/70 font-medium mb-8 tracking-wide max-w-[400px]"
-          style={{ fontSize: 'clamp(14px, 2vw, 18px)' }}
+          className="text-foreground/75 font-medium mb-6 tracking-wide max-w-[460px] leading-snug"
+          style={{ fontSize: 'clamp(13px, 1.7vw, 16px)' }}
         >
-          Scan, search, or look up your item to begin checkout.
+          Our new self-service POS system was supposed to fix checkout. It didn't.
+          Legacy systems are categorising the same products differently and breaking everything downstream.
         </div>
 
-        <div className="text-[13px] text-foreground/70 italic font-light max-w-[380px] leading-relaxed border border-border rounded-xl px-6 py-4 mb-10 bg-card/60 backdrop-blur-sm">
-          "This store has been running on four different inventory systems since 2003. Good luck."
+        <div className="text-[12px] text-foreground/65 italic font-light max-w-[420px] leading-relaxed border border-border rounded-xl px-6 py-4 mb-8 bg-card/60 backdrop-blur-sm">
+          Log in to admin settings. Review the items, define how each one should be classified, and assign each to an aisle.
+          Help us test whether fixing the product definitions restores order.
         </div>
 
         <button
@@ -190,7 +192,7 @@ const WelcomeScreen = ({ onStart, active, forceIdle, onIdleAcknowledged }: Welco
           data-sound="start"
           className="bg-primary text-primary-foreground border-none rounded-xl px-14 py-5 font-sans text-sm font-bold tracking-wide uppercase cursor-pointer transition-all hover:bg-primary-light hover:shadow-lg active:scale-[0.98] shadow-md"
         >
-          Start Lookup
+          Log In
         </button>
       </div>
     </div>

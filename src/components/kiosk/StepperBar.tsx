@@ -8,8 +8,8 @@ interface StepperBarProps {
 
 const STEPS = [
   { n: 1, label: 'Welcome' },
-  { n: 2, label: 'Lookup' },
-  { n: 3, label: 'Problem' },
+  { n: 2, label: 'Classify' },
+  { n: 3, label: 'Exceptions' },
   { n: 4, label: 'Solution' },
   { n: 5, label: 'Team' },
   { n: 6, label: 'Receipt' },

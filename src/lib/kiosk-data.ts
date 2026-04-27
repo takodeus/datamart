@@ -125,3 +125,55 @@ export const TOTAL_VALUES = [
   ['$83.40', 'Or $61.22.'],
   ['$178.30', 'Or $52.14.'],
 ];
+
+// ── Classification Console ────────────────────────────────────────
+// Categories shown in the right-panel multi-select. From the brief.
+export const CATEGORIES = [
+  'Baking',
+  'Beverages',
+  'Breakfast Cereal',
+  'Canned Goods',
+  'Pantry Staples',
+  'Pizza Toppings',
+  'Produce',
+  'Seafood',
+  'Snacks',
+  'Specialty Foods',
+];
+
+// Aisles shown in the right-panel single-select. From the brief.
+export interface Aisle {
+  label: string;
+  num: number;
+}
+
+export const AISLES: Aisle[] = [
+  { label: 'Produce',                       num: 1 },
+  { label: 'Beverages',                     num: 2 },
+  { label: 'Breakfast & Cereal',            num: 3 },
+  { label: 'Baking',                        num: 4 },
+  { label: 'Pantry',                        num: 5 },
+  { label: 'Canned Goods',                  num: 6 },
+  { label: 'Seafood',                       num: 7 },
+  { label: 'Specialty Foods',               num: 8 },
+  { label: 'End Cap / Promotional Display', num: 9 },
+];
+
+// ── False Resolution Reveal ───────────────────────────────────────
+// Exceptions that surface after the user "fixes" the classifications.
+// Order is the load order on screen 3.
+export interface FalseResolutionException {
+  headline: string;
+  detail?: string;
+}
+
+export const FALSE_RESOLUTION_EXCEPTIONS: FalseResolutionException[] = [
+  { headline: 'Inventory counts not reconciled' },
+  {
+    headline: 'Promotion notifications triggered for incorrect products',
+    detail: 'Buy 1, Get 40 Free promotion activated.',
+  },
+  { headline: 'Vendor feed introduced duplicate product entities' },
+  { headline: 'Forecasting engine using outdated classifications' },
+  { headline: 'Checkout recommendations still misaligned' },
+];

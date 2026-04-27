@@ -2,16 +2,27 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import cherreLogo from '@/assets/cherre-logo.jpeg';
 import { useSearchParams } from 'react-router-dom';
 import WelcomeScreen from '@/components/kiosk/WelcomeScreen';
-import ItemLookupScreen from '@/components/kiosk/ItemLookupScreen';
-import ReconciliationScreen from '@/components/kiosk/ReconciliationScreen';
+import ClassificationScreen, { type Classifications } from '@/components/kiosk/ClassificationScreen';
+import FalseResolutionScreen from '@/components/kiosk/FalseResolutionScreen';
 import ResolutionScreen from '@/components/kiosk/ResolutionScreen';
 import ReceiptScreen from '@/components/kiosk/ReceiptScreen';
 import TeamScreen from '@/components/kiosk/TeamScreen';
 import StepperBar from '@/components/kiosk/StepperBar';
-import CartSidebar from '@/components/kiosk/CartSidebar';
 import DeviceBezel from '@/components/kiosk/DeviceBezel';
 import { ITEMS } from '@/lib/kiosk-data';
-import { clickBeep, checkoutBeep, errorTone, successChime, scanBeep, initAudio, softClick, setSoundEnabled, startBeep, solutionVictory, receiptVictory } from '@/lib/kiosk-audio';
+import {
+  clickBeep,
+  checkoutBeep,
+  errorTone,
+  successChime,
+  scanBeep,
+  initAudio,
+  softClick,
+  setSoundEnabled,
+  startBeep,
+  solutionVictory,
+  receiptVictory,
+} from '@/lib/kiosk-audio';
 
 const TRANSITION_MS = 340;
 const SCREEN_MIN = 1;
@@ -27,6 +38,8 @@ function clampItem(v: string | null): number {
   return Number.isFinite(n) && n >= 0 && n < ITEMS.length ? n : 0;
 }
 
+const emptyClassifications = (): Classifications => ({});
+
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -38,9 +51,7 @@ const Index = () => {
 
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const [soundOn, setSoundOn] = useState(true);
-  const [itemsWithQuery, setItemsWithQuery] = useState<Set<number>>(new Set());
-  const [queriedMethods, setQueriedMethods] = useState<Set<number>[]>(ITEMS.map(() => new Set()));
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [classifications, setClassifications] = useState<Classifications>(emptyClassifications());
   const [maxReached, setMaxReached] = useState<number>(1);
   const [lockOnWelcome, setLockOnWelcome] = useState(false);
 
@@ -48,13 +59,13 @@ const Index = () => {
   const transitioning = useRef(false);
   const internalNavRef = useRef(0);
   const soundOnRef = useRef(true);
+
   useEffect(() => {
     soundOnRef.current = soundOn;
     setSoundEnabled(soundOn);
   }, [soundOn]);
 
-  // Global button sound router: fires on pointer-down so sounds start on
-  // press instead of waiting for click / mouse-up.
+  // Global button sound router.
   useEffect(() => {
     const handler = (e: PointerEvent) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -170,7 +181,7 @@ const Index = () => {
     });
   }, []);
 
-  // Initialize audio on first user interaction so the default-on sound can play
+  // Initialize audio on first interaction.
   useEffect(() => {
     const onFirstInteract = () => {
       initAudio();
@@ -190,27 +201,15 @@ const Index = () => {
     goTo(1);
   }, [goTo]);
 
-  const handleChangeQuantity = useCallback((itemIdx: number, delta: number) => {
-    setQuantities(prev => ({ ...prev, [itemIdx]: Math.max(1, (prev[itemIdx] ?? 1) + delta) }));
-  }, []);
-
-  const handleRemoveItem = useCallback((itemIdx: number) => {
-    setItemsWithQuery(prev => { const next = new Set(prev); next.delete(itemIdx); return next; });
-    setQuantities(prev => { const next = { ...prev }; delete next[itemIdx]; return next; });
-  }, []);
-
   const restart = useCallback(() => {
     window.dispatchEvent(new Event('kiosk:reset'));
-    setItemsWithQuery(new Set());
-    setQueriedMethods(ITEMS.map(() => new Set()));
-    setQuantities({});
+    setClassifications(emptyClassifications());
     setCurrentItem(0);
     setMaxReached(1);
     goTo(1);
   }, [goTo]);
 
-  // Auto-reset to welcome after 60s of inactivity (excluding screen 1 itself,
-  // which already has its own idle backdrop behavior).
+  // Auto-reset to welcome after 60s of inactivity (excluding screen 1 itself).
   const restartRef = useRef(restart);
   useEffect(() => { restartRef.current = restart; }, [restart]);
   useEffect(() => {
@@ -228,25 +227,22 @@ const Index = () => {
     };
   }, [currentScreen]);
 
-  // Auto-reset all session state whenever the Welcome screen is shown
-  // (covers the stepper "Welcome" jump as well as initial mount).
+  // Auto-reset all session state whenever the Welcome screen is shown.
   const didMount = useRef(false);
   useEffect(() => {
     if (currentScreen !== 1) return;
     if (!didMount.current) { didMount.current = true; return; }
     window.dispatchEvent(new Event('kiosk:reset'));
-    setItemsWithQuery(new Set());
-    setQueriedMethods(ITEMS.map(() => new Set()));
-    setQuantities({});
+    setClassifications(emptyClassifications());
     setCurrentItem(0);
     setMaxReached(1);
   }, [currentScreen]);
 
-  // Per-screen arrival sounds: error on Problem, victory on Solution & Receipt.
+  // Per-screen arrival sounds: Solution & Receipt victory chimes still apply.
+  // Screen 3 (False Resolution) plays its own error tone internally.
   useEffect(() => {
     if (!soundOnRef.current) return;
-    if (currentScreen === 3) errorTone();
-    else if (currentScreen === 4) solutionVictory();
+    if (currentScreen === 4) solutionVictory();
     else if (currentScreen === 6) receiptVictory();
   }, [currentScreen]);
 
@@ -267,21 +263,24 @@ const Index = () => {
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 relative overflow-hidden">
             <div data-screen="1" className={`screen ${currentScreen === 1 ? `active enter-${direction}` : ''}`}>
-              <WelcomeScreen onStart={() => goTo(2)} active={currentScreen === 1} forceIdle={lockOnWelcome} onIdleAcknowledged={() => setLockOnWelcome(false)} />
+              <WelcomeScreen
+                onStart={() => goTo(2)}
+                active={currentScreen === 1}
+                forceIdle={lockOnWelcome}
+                onIdleAcknowledged={() => setLockOnWelcome(false)}
+              />
             </div>
             <div data-screen="2" className={`screen ${currentScreen === 2 ? `active enter-${direction}` : ''}`}>
-              <ItemLookupScreen
+              <ClassificationScreen
                 currentItem={currentItem}
                 onSelectItem={selectItem}
-                itemsWithQuery={itemsWithQuery}
-                setItemsWithQuery={setItemsWithQuery}
-                queriedMethods={queriedMethods}
-                setQueriedMethods={setQueriedMethods}
-                onCheckout={() => goTo(3)}
+                classifications={classifications}
+                setClassifications={setClassifications}
+                onUpdateSystem={() => goTo(3)}
               />
             </div>
             <div data-screen="3" className={`screen ${currentScreen === 3 ? `active enter-${direction}` : ''}`}>
-              <ReconciliationScreen onBetterWay={() => goTo(4)} active={currentScreen === 3} itemsWithQuery={itemsWithQuery} queriedMethods={queriedMethods} quantities={quantities} />
+              <FalseResolutionScreen onGetHelp={() => goTo(4)} active={currentScreen === 3} />
             </div>
             <div data-screen="4" className={`screen ${currentScreen === 4 ? `active enter-${direction}` : ''}`}>
               <ResolutionScreen onTalk={() => goTo(5)} onSkipToReceipt={() => goTo(6)} />
@@ -292,21 +291,10 @@ const Index = () => {
             <div data-screen="6" className={`screen ${currentScreen === 6 ? `active enter-${direction}` : ''}`}>
               <ReceiptScreen
                 onRestart={restart}
-                itemsWithQuery={itemsWithQuery}
-                queriedMethods={queriedMethods}
+                classifications={classifications}
               />
             </div>
           </div>
-
-          {/* Running cart sidebar */}
-          <CartSidebar
-            itemsWithQuery={itemsWithQuery}
-            queriedMethods={queriedMethods}
-            currentScreen={currentScreen}
-            quantities={quantities}
-            onChangeQuantity={handleChangeQuantity}
-            onRemoveItem={handleRemoveItem}
-          />
         </div>
       </div>
     </DeviceBezel>

@@ -3,8 +3,9 @@
 ## Core
 Cherre self-checkout kiosk (6 screens). Montserrat font, Cherre red (#E12132) accent, white/light grey palette.
 UI uses 0.75rem rounded corners. No truncation in lookup cards (auto-expand height).
-Deployed to GitHub Pages at `/cherre-data-explorer/` — dynamic base paths required.
-ResolutionScreen (Solution tab) must NEVER show a Cherre QR code — do not re-add.
+Deployed to GitHub Pages at `/datamart/` — dynamic base paths required.
+Experience mechanic: Classification Console (per Page Copy brief). User classifies products, then sees a False Resolution Reveal showing the fix didn't work.
+ResolutionScreen (Solution tab) must NEVER show a Cherre QR code — do not re-add. Confirmed by stakeholder.
 
 ## Memories
 - [Project Overview](mem://project/overview) — Full 6-screen flow details and kiosk terminal UX context
