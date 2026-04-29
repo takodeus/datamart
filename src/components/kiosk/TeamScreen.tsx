@@ -183,13 +183,13 @@ const TeamScreen = ({ onContinue }: TeamScreenProps) => {
                 onClick={() => setZoomedMember(member)}
                 data-sound="click"
                 aria-label={`Enlarge ${member.name} LinkedIn QR code`}
-                className="text-primary rounded-md overflow-hidden shadow-sm bg-white cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="text-primary rounded-md shadow-sm bg-primary-foreground p-1 cursor-pointer transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {member.qrImage ? (
                   <img
                     src={member.qrImage}
                     alt={`${member.name} LinkedIn QR`}
-                    className="w-11 h-11 object-contain"
+                    className="w-10 h-10 object-contain"
                   />
                 ) : (
                   <QRPlaceholder size={44} />
@@ -230,7 +230,7 @@ const TeamScreen = ({ onContinue }: TeamScreenProps) => {
                 {zoomedMember.title}
               </div>
             </div>
-            <div className="text-primary rounded-lg overflow-hidden bg-white p-3 shadow-inner">
+            <div className="text-primary rounded-lg bg-primary-foreground p-4 shadow-inner">
               {zoomedMember.qrImage ? (
                 <img
                   src={zoomedMember.qrImage}
