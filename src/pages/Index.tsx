@@ -289,9 +289,7 @@ const Index = () => {
   useEffect(() => {
     if (!soundOnRef.current) return;
     if (currentScreen === 4) solutionVictory();
-    else if (currentScreen === 5) {
-      // teamVictory imported below via dynamic ref to avoid extra import churn
-    }
+    else if (currentScreen === 5) teamVictory();
     else if (currentScreen === 6) receiptVictory();
   }, [currentScreen]);
 
