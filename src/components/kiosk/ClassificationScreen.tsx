@@ -325,7 +325,7 @@ const ClassificationScreen = ({
             <button
               onClick={onUpdateSystem}
               disabled={!canSubmit}
-              data-sound="none"
+              data-sound="checkout"
               className={`w-full rounded-xl px-4 py-3 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm ${
                 canSubmit
                   ? 'bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98] cursor-pointer'
