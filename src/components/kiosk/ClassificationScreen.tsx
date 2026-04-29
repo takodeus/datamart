@@ -40,12 +40,51 @@ const ClassificationScreen = ({
   const item = ITEMS[currentItem];
   const current = classifications[currentItem] ?? { categories: [], aisle: null };
 
+  const MIN_TO_SUBMIT = 3;
+
   const classifiedCount = useMemo(
     () => ITEMS.filter((_, i) => isClassified(classifications[i])).length,
     [classifications],
   );
   const allClassified = classifiedCount === ITEMS.length;
-  const canSubmit = classifiedCount >= 1; // require at least one before "Update System"
+  const canSubmit = classifiedCount >= MIN_TO_SUBMIT;
+  const remainingToUnlock = Math.max(0, MIN_TO_SUBMIT - classifiedCount);
+
+  // Index of the next unclassified item after `from`, wrapping around.
+  // Returns null if every item is classified.
+  const findNextUnclassified = (from: number): number | null => {
+    for (let step = 1; step <= ITEMS.length; step++) {
+      const idx = (from + step) % ITEMS.length;
+      if (!isClassified(classifications[idx])) return idx;
+    }
+    return null;
+  };
+
+  // Auto-advance: when the current item becomes fully classified, jump to the
+  // next unclassified item after a short pause so the user sees the green tick.
+  // Skipped when the user is mid-scroll inside the modal (zoomOpen).
+  const justClassifiedRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (zoomOpen) return;
+    const cur = classifications[currentItem];
+    if (!isClassified(cur)) {
+      justClassifiedRef.current = null;
+      return;
+    }
+    if (justClassifiedRef.current === currentItem) return;
+    justClassifiedRef.current = currentItem;
+    const next = findNextUnclassified(currentItem);
+    if (next === null) return; // everything done — let the user submit
+    const t = setTimeout(() => onSelectItem(next), 850);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [classifications, currentItem, zoomOpen]);
+
+  const goToNext = () => {
+    const next = findNextUnclassified(currentItem);
+    if (next !== null) onSelectItem(next);
+  };
+  const hasNextUnclassified = findNextUnclassified(currentItem) !== null;
 
   const toggleCategory = (cat: string) => {
     setClassifications(prev => {
@@ -297,23 +336,36 @@ const ClassificationScreen = ({
             </div>
           </div>
 
-          <div className="px-4 py-3 border-t border-border bg-background/60">
+          <div className="px-4 py-3 border-t border-border bg-background/60 space-y-2">
+            {hasNextUnclassified && (
+              <button
+                onClick={goToNext}
+                data-sound="click"
+                className="w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98]"
+              >
+                Next product →
+              </button>
+            )}
             <button
               onClick={onUpdateSystem}
               disabled={!canSubmit}
               data-sound="checkout"
-              className={`w-full rounded-xl px-4 py-3 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm ${
+              className={`w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all ${
                 canSubmit
-                  ? 'bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98] cursor-pointer'
+                  ? hasNextUnclassified
+                    ? 'bg-background text-foreground border border-primary/40 hover:bg-primary-light-bg active:scale-[0.98] cursor-pointer'
+                    : 'bg-primary text-primary-foreground hover:bg-primary-light shadow-sm hover:shadow-md active:scale-[0.98] cursor-pointer'
                   : 'bg-muted text-muted-foreground/60 cursor-not-allowed'
               }`}
             >
               Update System
             </button>
-            <div className="text-[9px] text-muted-foreground/70 mt-1.5 text-center">
+            <div className="text-[9px] text-muted-foreground/70 text-center leading-snug">
               {allClassified
                 ? 'All items classified. Ready to apply.'
-                : `${ITEMS.length - classifiedCount} item${ITEMS.length - classifiedCount === 1 ? '' : 's'} pending — submit anytime.`}
+                : !canSubmit
+                ? `Classify ${remainingToUnlock} more product${remainingToUnlock === 1 ? '' : 's'} to unlock Update System (${classifiedCount}/${ITEMS.length} done).`
+                : `${classifiedCount}/${ITEMS.length} classified — keep going or submit now.`}
             </div>
           </div>
         </div>
