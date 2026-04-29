@@ -1,41 +1,29 @@
-## Let users pick the next product themselves
+## Problem
 
-Right now, after a user finishes classifying an item, the selection auto-jumps to the next unclassified product after ~850ms, and the right-panel footer shows a "Next product →" button that walks through items in order. Both of these decide *for* the user. This plan removes the automatic and sequential nudges and replaces them with a clear inline picker that lets the user choose any remaining product.
+Sounds currently fire on `pointerdown`, which triggers the moment a finger or mouse button touches a button — even if the user is starting a scroll/swipe gesture and never actually meant to "click." On a touch kiosk, any tap that begins on a button (even one that turns into a scroll) plays a beep.
 
-### Behavior changes
+## Fix
 
-- **Remove auto-advance.** Drop the `useEffect` that schedules `onSelectItem(next)` after the current item is classified. The selection stays where the user put it.
-- **Remove the "Next product →" CTA** from the right-panel footer. It implied a fixed sequence.
-- **Remove `findNextUnclassified` / `goToNext` / `hasNextUnclassified` / `justClassifiedRef`** — no longer needed.
-- **Keep the existing left "Sample Products" list** as the always-available picker. It already shows status dots and is the natural place to pick freely.
-- **Keep the threshold** (`MIN_TO_SUBMIT = 3`) and the "Update System" button in the right-panel footer, restored to a single full-width primary button (its original look).
+Switch the global sound router in `src/pages/Index.tsx` from `pointerdown` to a true "click was completed on this button" signal:
 
-### New: inline "Pick the next product" panel
+1. **Use `click` instead of `pointerdown`** as the trigger event. The browser only fires `click` when the pointer goes down AND up on the same element without being interpreted as a scroll/drag — which is exactly the "button was selected" semantic the user wants.
 
-When the current item is classified and at least one other item is still unclassified, show a small inline picker just below the right-panel footer hint (or replace the hint with it). It contains:
+2. **Keep `pointerdown` only for `initAudio()`** (a separate, silent listener). Audio contexts must be unlocked by a user gesture, and `pointerdown` is the earliest reliable one. This listener does not play any sound — it just primes the AudioContext so the later `click`-triggered beeps aren't delayed.
 
-- A short prompt: "Classified — pick another product to continue."
-- A horizontal row of compact tiles, one per **unclassified** item, showing the thumbnail + name. Each is a button that calls `onSelectItem(idx)`. No fixed order is implied — the user chooses.
-- If every item is classified, replace the picker with the "All items classified. Ready to apply." line that already exists.
+3. **Preserve all existing behavior**: `data-sound` opt-in, sound-on toggle, disabled-button check, the `switch` mapping for `start` / `scan` / `error` / `success` / `checkout` / `click`, and the soft-click default.
 
-This keeps the choice visible right next to the "Update System" CTA, so the user can decide each time whether to keep classifying or submit now.
+### Technical detail
 
-### Footer hint copy
+In `src/pages/Index.tsx`, the `useEffect` at lines ~68–106:
+- Rename the handler and attach it via `document.addEventListener('click', handler, true)` instead of `pointerdown`.
+- Drop the `e.pointerType` / `e.button` guard (not applicable to `MouseEvent` from `click`; the browser already filters non-primary clicks out of `click`).
+- Move the `initAudio()` call into a small, separate `pointerdown` listener that does nothing else (or fold it into the existing "Initialize audio on first interaction" effect already present lower in the file — that one already handles it, so the inline `initAudio()` in the sound router can simply be removed).
 
-- `< MIN_TO_SUBMIT` classified: "Classify N more product(s) to unlock Update System (X/6 done)."
-- `>= MIN_TO_SUBMIT` and not all done: "X/6 classified — pick another product to continue, or submit now."
-- All done: "All items classified. Ready to apply."
+No other files need to change. Buttons keep their existing `data-sound` attributes.
 
-### Files
+## Result
 
-- `src/components/kiosk/ClassificationScreen.tsx` — only file touched.
-  - Delete: `findNextUnclassified`, `goToNext`, `hasNextUnclassified`, `justClassifiedRef`, the auto-advance `useEffect`.
-  - Add: derived `unclassifiedIndices` (excluding the current item) + `currentDone` boolean.
-  - Footer JSX: drop the "Next product →" button; restore "Update System" to a single full-width primary; render the inline picker tiles when `currentDone && unclassifiedIndices.length > 0`.
-  - Imports: remove `useRef` if no other usage remains; remove `useEffect` if no other usage remains (it is still used for the scroll reset, so keep it).
-
-### Out of scope
-
-- No changes to the `Item` data model, the left list, the middle lookups panel, or the ProductDetailModal.
-- No new sounds (the inline tile buttons use the existing `data-sound="click"`).
-- No changes to the threshold or the "Update System" gating logic.
+- Tapping and releasing on a button → beep (as today).
+- Touching a button and dragging to scroll → no beep (the browser cancels the `click`).
+- Right-clicks, middle-clicks, keyboard focus, hover → no beep.
+- Sound-off toggle still mutes everything.
