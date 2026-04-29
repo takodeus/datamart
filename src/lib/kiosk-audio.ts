@@ -76,8 +76,8 @@ export const scanBeep = () =>
 
 export const errorTone = () =>
   playSequence([
-    { f: 240, d: 0.16, t: 'sawtooth', v: 0.15 },
-    { f: 190, d: 0.2, t: 'sawtooth', v: 0.12, gap: 0.12 },
+    { f: 240, d: 0.07, t: 'sawtooth', v: 0.07 },
+    { f: 190, d: 0.09, t: 'sawtooth', v: 0.06, gap: 0.05 },
   ]);
 
 export const successChime = () =>
