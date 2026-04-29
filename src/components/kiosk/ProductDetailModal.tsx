@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { X, ZoomIn } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Minus, Plus, RotateCcw, X, ZoomIn } from 'lucide-react';
 import type { Item } from '@/lib/kiosk-data';
 import { resolveItemImages } from './itemImages';
+
+const ZOOM_LEVELS = [1, 1.5, 2, 3] as const;
 
 interface ProductDetailModalProps {
   item: Item | null;
@@ -11,11 +13,26 @@ interface ProductDetailModalProps {
 
 const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) => {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [zoomIdx, setZoomIdx] = useState(0); // index into ZOOM_LEVELS
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(null);
+  const zoom = ZOOM_LEVELS[zoomIdx];
+  const isZoomed = zoom > 1;
 
-  // Reset gallery when item changes or modal opens.
+  const resetZoom = () => {
+    setZoomIdx(0);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Reset gallery + zoom when item changes, opens, or active image changes.
   useEffect(() => {
     setActiveIdx(0);
+    resetZoom();
   }, [item, open]);
+
+  useEffect(() => {
+    resetZoom();
+  }, [activeIdx]);
 
   // Keyboard handlers.
   useEffect(() => {
