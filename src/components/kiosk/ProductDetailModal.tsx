@@ -108,18 +108,88 @@ const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) =>
         {/* Body — 2 cols */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-[55%_45%] min-h-0 overflow-hidden">
           {/* Image area */}
-          <div className="bg-background flex flex-col border-b md:border-b-0 md:border-r border-border">
-            <div className="flex-1 min-h-[260px] flex items-center justify-center p-6">
+          <div className="bg-background flex flex-col border-b md:border-b-0 md:border-r border-border relative">
+            <div
+              className={`flex-1 min-h-[260px] flex items-center justify-center p-6 overflow-hidden select-none ${
+                isZoomed ? 'cursor-grab active:cursor-grabbing' : activeImg ? 'cursor-zoom-in' : ''
+              }`}
+              onPointerDown={(e) => {
+                if (!activeImg) return;
+                if (!isZoomed) {
+                  // Single tap on un-zoomed image → step in one zoom level.
+                  setZoomIdx(i => Math.min(ZOOM_LEVELS.length - 1, i + 1));
+                  return;
+                }
+                (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+                dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: pan.x, baseY: pan.y };
+              }}
+              onPointerMove={(e) => {
+                if (!dragRef.current) return;
+                const dx = e.clientX - dragRef.current.startX;
+                const dy = e.clientY - dragRef.current.startY;
+                setPan({ x: dragRef.current.baseX + dx, y: dragRef.current.baseY + dy });
+              }}
+              onPointerUp={(e) => {
+                if (dragRef.current) {
+                  (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
+                  dragRef.current = null;
+                }
+              }}
+              onPointerCancel={() => { dragRef.current = null; }}
+              onDoubleClick={() => resetZoom()}
+            >
               {activeImg ? (
                 <img
                   src={activeImg}
                   alt={`${item.name} ${activeIdx === 0 ? 'front' : 'back'}`}
-                  className="max-w-full max-h-[380px] object-contain"
+                  draggable={false}
+                  className="max-w-full max-h-[380px] object-contain transition-transform duration-150 ease-out will-change-transform pointer-events-none"
+                  style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
                 />
               ) : (
                 <div className="text-6xl">{item.icon}</div>
               )}
             </div>
+
+            {/* Zoom controls overlay */}
+            {activeImg && (
+              <div className="absolute top-3 right-3 flex items-center gap-1 bg-card/90 backdrop-blur-sm border border-border rounded-full shadow-sm px-1 py-1">
+                <button
+                  type="button"
+                  onClick={() => { setZoomIdx(i => Math.max(0, i - 1)); setPan({ x: 0, y: 0 }); }}
+                  disabled={zoomIdx === 0}
+                  data-sound="click"
+                  aria-label="Zoom out"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-foreground/70 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[10px] font-mono font-bold text-foreground/80 tabular-nums w-9 text-center">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setZoomIdx(i => Math.min(ZOOM_LEVELS.length - 1, i + 1))}
+                  disabled={zoomIdx === ZOOM_LEVELS.length - 1}
+                  data-sound="click"
+                  aria-label="Zoom in"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-foreground/70 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={resetZoom}
+                  disabled={!isZoomed && pan.x === 0 && pan.y === 0}
+                  data-sound="click"
+                  aria-label="Reset zoom"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-foreground/70 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {images.length > 1 && (
               <div className="flex items-center justify-center gap-2 px-4 py-3 border-t border-border bg-card/40">
                 {images.map((src, i) => {
