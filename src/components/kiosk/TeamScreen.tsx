@@ -1,5 +1,5 @@
 import austinHicks from '@/assets/team/austin-hicks.png';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import tamaHuang from '@/assets/team/tama-huang.jpg';
 import choXue from '@/assets/team/cho-xue.jpg';
 import margaretGuelzow from '@/assets/team/margaret-guelzow.jpg';
