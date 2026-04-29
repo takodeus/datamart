@@ -1,5 +1,5 @@
 import austinHicks from '@/assets/team/austin-hicks.png';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import tamaHuang from '@/assets/team/tama-huang.jpg';
 import choXue from '@/assets/team/cho-xue.jpg';
 import margaretGuelzow from '@/assets/team/margaret-guelzow.jpg';
@@ -125,6 +125,13 @@ interface TeamScreenProps {
 
 const TeamScreen = ({ onContinue }: TeamScreenProps) => {
   const [zoomedMember, setZoomedMember] = useState<TeamMember | null>(null);
+
+  // Close the QR zoom popup whenever the kiosk resets (welcome / reset btn).
+  useEffect(() => {
+    const onReset = () => setZoomedMember(null);
+    window.addEventListener('kiosk:reset', onReset);
+    return () => window.removeEventListener('kiosk:reset', onReset);
+  }, []);
 
   return (
     <div
