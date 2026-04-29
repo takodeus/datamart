@@ -66,10 +66,11 @@ const Index = () => {
   }, [soundOn]);
 
   // Global button sound router.
+  // Fires on `click` (not `pointerdown`) so sounds only play when the user
+  // truly selects a button — gestures that begin on a button but turn into
+  // a scroll/drag are filtered out by the browser's click semantics.
   useEffect(() => {
-    const handler = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      initAudio();
+    const handler = (e: MouseEvent) => {
       if (!soundOnRef.current) return;
       const target = e.target as HTMLElement | null;
       const btn = target?.closest('button') as HTMLButtonElement | null;
