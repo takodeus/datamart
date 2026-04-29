@@ -336,23 +336,36 @@ const ClassificationScreen = ({
             </div>
           </div>
 
-          <div className="px-4 py-3 border-t border-border bg-background/60">
+          <div className="px-4 py-3 border-t border-border bg-background/60 space-y-2">
+            {hasNextUnclassified && (
+              <button
+                onClick={goToNext}
+                data-sound="click"
+                className="w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98]"
+              >
+                Next product →
+              </button>
+            )}
             <button
               onClick={onUpdateSystem}
               disabled={!canSubmit}
               data-sound="checkout"
-              className={`w-full rounded-xl px-4 py-3 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm ${
+              className={`w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all ${
                 canSubmit
-                  ? 'bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98] cursor-pointer'
+                  ? hasNextUnclassified
+                    ? 'bg-background text-foreground border border-primary/40 hover:bg-primary-light-bg active:scale-[0.98] cursor-pointer'
+                    : 'bg-primary text-primary-foreground hover:bg-primary-light shadow-sm hover:shadow-md active:scale-[0.98] cursor-pointer'
                   : 'bg-muted text-muted-foreground/60 cursor-not-allowed'
               }`}
             >
               Update System
             </button>
-            <div className="text-[9px] text-muted-foreground/70 mt-1.5 text-center">
+            <div className="text-[9px] text-muted-foreground/70 text-center leading-snug">
               {allClassified
                 ? 'All items classified. Ready to apply.'
-                : `${ITEMS.length - classifiedCount} item${ITEMS.length - classifiedCount === 1 ? '' : 's'} pending — submit anytime.`}
+                : !canSubmit
+                ? `Classify ${remainingToUnlock} more product${remainingToUnlock === 1 ? '' : 's'} to unlock Update System (${classifiedCount}/${ITEMS.length} done).`
+                : `${classifiedCount}/${ITEMS.length} classified — keep going or submit now.`}
             </div>
           </div>
         </div>
