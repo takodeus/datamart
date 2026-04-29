@@ -36,7 +36,7 @@ export const ITEMS: Item[] = [
   {
     name: "Alpha Bytes Cereal",
     icon: '🥣',
-    images: ['Cherre-Os.png', 'cherre-os-back.png'],
+    images: ['alpha-bytes-front.png', 'alpha-bytes-back.png'],
     category: 'Cereal box',
     price: '$5.49',
     conflictPrice: 'or $3.99?',

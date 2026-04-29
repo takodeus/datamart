@@ -1,5 +1,7 @@
 import cherreOsImg from '@/assets/Cherre-Os.png';
 import cherreOsBackImg from '@/assets/cherre-os-back.png';
+import alphaBytesFrontImg from '@/assets/alpha-bytes-front.png';
+import alphaBytesBackImg from '@/assets/alpha-bytes-back.png';
 import ontoloFrontImg from '@/assets/ontolo-front.png';
 import ontoloBackImg from '@/assets/ontolo-back.png';
 import cherriesFrontImg from '@/assets/cherries-front.png';
@@ -15,6 +17,8 @@ import cherreColaBackImg from '@/assets/cherre-cola-back.png';
 export const ITEM_IMAGES: Record<string, string> = {
   'Cherre-Os.png': cherreOsImg,
   'cherre-os-back.png': cherreOsBackImg,
+  'alpha-bytes-front.png': alphaBytesFrontImg,
+  'alpha-bytes-back.png': alphaBytesBackImg,
   'ontolo-front.png': ontoloFrontImg,
   'ontolo-back.png': ontoloBackImg,
   'cherries-front.png': cherriesFrontImg,
