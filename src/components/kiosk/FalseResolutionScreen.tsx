@@ -40,8 +40,9 @@ const FalseResolutionScreen = ({ onGetHelp, active }: FalseResolutionScreenProps
       timersRef.current.push(id);
     };
 
-    // Play the error tone once when the screen shows (not per-item).
-    errorTone();
+    // Play the error tone shortly after the screen shows so it lands
+    // with the UI rather than overlapping the screen-transition click.
+    schedule(220, () => errorTone());
 
     // Stage 1 → 2: pretend the fix worked, then start surfacing exceptions.
     schedule(APPLIED_DELAY, () => {
