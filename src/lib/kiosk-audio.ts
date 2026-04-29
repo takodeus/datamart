@@ -76,8 +76,8 @@ export const scanBeep = () =>
 
 export const errorTone = () =>
   playSequence([
-    { f: 220, d: 0.28, t: 'sawtooth', v: 0.15 },
-    { f: 180, d: 0.32, t: 'sawtooth', v: 0.12, gap: 0.18 },
+    { f: 240, d: 0.09, t: 'sawtooth', v: 0.15 },
+    { f: 190, d: 0.11, t: 'sawtooth', v: 0.12, gap: 0.07 },
   ]);
 
 export const successChime = () =>
@@ -87,11 +87,13 @@ export const successChime = () =>
     }))
   );
 
-// Short victory chirp for the Solution screen — bright two-note rise.
+// Bright, lively victory for the Solution screen — square-wave fanfare
+// with an octave jump so it's clearly distinct from receipt/team chimes.
 export const solutionVictory = () =>
   playSequence([
-    { f: 784, d: 0.12, t: 'triangle', v: 0.22 },
-    { f: 1175, d: 0.18, t: 'triangle', v: 0.22, gap: 0.09 },
+    { f: 659, d: 0.1, t: 'square', v: 0.18 },
+    { f: 988, d: 0.1, t: 'square', v: 0.18, gap: 0.08 },
+    { f: 1319, d: 0.22, t: 'square', v: 0.2, gap: 0.08 },
   ]);
 
 // Slightly different victory chirp for the Receipt screen — three-note
