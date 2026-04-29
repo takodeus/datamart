@@ -40,16 +40,18 @@ const FalseResolutionScreen = ({ onGetHelp, active }: FalseResolutionScreenProps
       timersRef.current.push(id);
     };
 
+    // Play the error tone once when the screen shows (not per-item).
+    errorTone();
+
     // Stage 1 → 2: pretend the fix worked, then start surfacing exceptions.
     schedule(APPLIED_DELAY, () => {
       setPhase('loading');
     });
 
-    // Stage 2 → 3: reveal exceptions one by one.
+    // Stage 2 → 3: reveal exceptions one by one (silent reveals).
     FALSE_RESOLUTION_EXCEPTIONS.forEach((_, i) => {
       schedule(APPLIED_DELAY + 300 + i * EXCEPTION_STAGGER, () => {
         setRevealedCount(i + 1);
-        errorTone();
         if (i === 0) setPhase('revealing');
       });
     });
