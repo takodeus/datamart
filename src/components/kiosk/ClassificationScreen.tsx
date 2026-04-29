@@ -30,11 +30,15 @@ const ClassificationScreen = ({
   onUpdateSystem,
 }: ClassificationScreenProps) => {
   const middleScrollRef = useRef<HTMLDivElement | null>(null);
+  const leftScrollRef = useRef<HTMLDivElement | null>(null);
+  const rightScrollRef = useRef<HTMLDivElement | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
 
-  // Reset middle-panel scroll on item change.
+  // Reset all panel scrolls on item change.
   useEffect(() => {
     middleScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    leftScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    rightScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentItem]);
 
   const item = ITEMS[currentItem];
@@ -116,7 +120,7 @@ const ClassificationScreen = ({
               Sample Products
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto py-1">
+          <div ref={leftScrollRef} className="flex-1 overflow-y-auto py-1">
             {ITEMS.map((it, i) => {
               const done = isClassified(classifications[i]);
               const active = i === currentItem;
@@ -236,7 +240,7 @@ const ClassificationScreen = ({
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-3">
+          <div ref={rightScrollRef} className="flex-1 overflow-y-auto px-4 py-3">
 
             {/* Category — multi-select */}
             <div className="mb-5">
@@ -306,35 +310,9 @@ const ClassificationScreen = ({
 
           <div className="px-4 py-3 border-t border-border bg-background/60 space-y-2">
             {currentDone && unclassifiedIndices.length > 0 && (
-              <div className="rounded-lg border border-primary/30 bg-primary-light-bg/60 p-2.5">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-primary mb-1.5">
-                  Classified — pick another product
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {unclassifiedIndices.map(idx => {
-                    const it = ITEMS[idx];
-                    const img = it.images?.[0] ? ITEM_IMAGES[it.images[0]] : undefined;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => onSelectItem(idx)}
-                        data-sound="click"
-                        title={it.name}
-                        className="flex items-center gap-1.5 rounded-md border border-border bg-background hover:border-primary/50 hover:bg-card transition-colors px-1.5 py-1 max-w-full"
-                      >
-                        <span className="w-6 h-6 rounded bg-card border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {img
-                            ? <img src={img} alt="" className="w-full h-full object-contain p-0.5" />
-                            : <span className="text-[11px]">{it.icon}</span>}
-                        </span>
-                        <span className="text-[10px] font-semibold text-foreground/85 truncate max-w-[90px]">
-                          {it.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground px-1">
+                <span aria-hidden className="text-primary font-bold">←</span>
+                <span>Nice — now pick another product from the list on the left.</span>
               </div>
             )}
             <button
