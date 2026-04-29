@@ -305,24 +305,45 @@ const ClassificationScreen = ({
           </div>
 
           <div className="px-4 py-3 border-t border-border bg-background/60 space-y-2">
-            {hasNextUnclassified && (
-              <button
-                onClick={goToNext}
-                data-sound="click"
-                className="w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98]"
-              >
-                Next product →
-              </button>
+            {currentDone && unclassifiedIndices.length > 0 && (
+              <div className="rounded-lg border border-primary/30 bg-primary-light-bg/60 p-2.5">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-primary mb-1.5">
+                  Classified — pick another product
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {unclassifiedIndices.map(idx => {
+                    const it = ITEMS[idx];
+                    const img = it.images?.[0] ? ITEM_IMAGES[it.images[0]] : undefined;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => onSelectItem(idx)}
+                        data-sound="click"
+                        title={it.name}
+                        className="flex items-center gap-1.5 rounded-md border border-border bg-background hover:border-primary/50 hover:bg-card transition-colors px-1.5 py-1 max-w-full"
+                      >
+                        <span className="w-6 h-6 rounded bg-card border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {img
+                            ? <img src={img} alt="" className="w-full h-full object-contain p-0.5" />
+                            : <span className="text-[11px]">{it.icon}</span>}
+                        </span>
+                        <span className="text-[10px] font-semibold text-foreground/85 truncate max-w-[90px]">
+                          {it.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             )}
             <button
               onClick={onUpdateSystem}
               disabled={!canSubmit}
               data-sound="checkout"
-              className={`w-full rounded-xl px-4 py-2.5 font-sans text-[12px] font-bold tracking-wide uppercase transition-all ${
+              className={`w-full rounded-xl px-4 py-3 font-sans text-[12px] font-bold tracking-wide uppercase transition-all shadow-sm ${
                 canSubmit
-                  ? hasNextUnclassified
-                    ? 'bg-background text-foreground border border-primary/40 hover:bg-primary-light-bg active:scale-[0.98] cursor-pointer'
-                    : 'bg-primary text-primary-foreground hover:bg-primary-light shadow-sm hover:shadow-md active:scale-[0.98] cursor-pointer'
+                  ? 'bg-primary text-primary-foreground hover:bg-primary-light hover:shadow-md active:scale-[0.98] cursor-pointer'
                   : 'bg-muted text-muted-foreground/60 cursor-not-allowed'
               }`}
             >
@@ -333,7 +354,7 @@ const ClassificationScreen = ({
                 ? 'All items classified. Ready to apply.'
                 : !canSubmit
                 ? `Classify ${remainingToUnlock} more product${remainingToUnlock === 1 ? '' : 's'} to unlock Update System (${classifiedCount}/${ITEMS.length} done).`
-                : `${classifiedCount}/${ITEMS.length} classified — keep going or submit now.`}
+                : `${classifiedCount}/${ITEMS.length} classified — pick another product to continue, or submit now.`}
             </div>
           </div>
         </div>
