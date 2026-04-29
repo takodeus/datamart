@@ -1,33 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ZoomIn } from 'lucide-react';
 import { ITEMS, CATEGORIES, AISLES, type Aisle } from '@/lib/kiosk-data';
-import cherreOsImg from '@/assets/Cherre-Os.png';
-import cherreOsBackImg from '@/assets/cherre-os-back.png';
-import ontoloFrontImg from '@/assets/ontolo-front.png';
-import ontoloBackImg from '@/assets/ontolo-back.png';
-import cherriesFrontImg from '@/assets/cherries-front.png';
-import cherriesBackImg from '@/assets/cherries-back.png';
-import flourFrontImg from '@/assets/flour-front.png';
-import flourBackImg from '@/assets/flour-back.png';
-import sardinesFrontImg from '@/assets/sardines-front.png';
-import sardinesBackImg from '@/assets/sardines-back.png';
-import cherreColaFrontImg from '@/assets/cherre-cola-front.png';
-import cherreColaBackImg from '@/assets/cherre-cola-back.png';
-
-// Map image filenames (as stored in kiosk-data) to their imported URLs.
-const ITEM_IMAGES: Record<string, string> = {
-  'Cherre-Os.png': cherreOsImg,
-  'cherre-os-back.png': cherreOsBackImg,
-  'ontolo-front.png': ontoloFrontImg,
-  'ontolo-back.png': ontoloBackImg,
-  'cherries-front.png': cherriesFrontImg,
-  'cherries-back.png': cherriesBackImg,
-  'flour-front.png': flourFrontImg,
-  'flour-back.png': flourBackImg,
-  'sardines-front.png': sardinesFrontImg,
-  'sardines-back.png': sardinesBackImg,
-  'cherre-cola-front.png': cherreColaFrontImg,
-  'cherre-cola-back.png': cherreColaBackImg,
-};
+import { ITEM_IMAGES } from './itemImages';
+import ProductDetailModal from './ProductDetailModal';
 
 export interface ItemClassification {
   categories: string[];   // multi-select
@@ -55,6 +30,7 @@ const ClassificationScreen = ({
   onUpdateSystem,
 }: ClassificationScreenProps) => {
   const middleScrollRef = useRef<HTMLDivElement | null>(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   // Reset middle-panel scroll on item change.
   useEffect(() => {
@@ -141,8 +117,12 @@ const ClassificationScreen = ({
               return (
                 <button
                   key={it.name}
-                  onClick={() => onSelectItem(i)}
+                  onClick={() => {
+                    if (active) setZoomOpen(true);
+                    else onSelectItem(i);
+                  }}
                   data-sound="click"
+                  title={active ? 'Tap again to zoom' : it.name}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors border-l-2 ${
                     active
                       ? 'bg-primary-light-bg border-l-primary'
@@ -175,19 +155,31 @@ const ClassificationScreen = ({
         {/* MIDDLE — system descriptions ────────────────────────────── */}
         <div className="flex-1 min-w-0 flex flex-col bg-background">
           <div className="px-5 py-2.5 border-b border-border/60 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {itemImg && (
-                <div className="w-8 h-8 rounded-md bg-card border border-border flex items-center justify-center overflow-hidden">
-                  <img src={itemImg} alt={item.name} className="w-full h-full object-contain p-0.5" />
-                </div>
-              )}
-              <div>
-                <div className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground">
-                  Selected
-                </div>
-                <div className="text-[13px] font-bold text-foreground leading-tight">{item.name}</div>
+            <button
+              type="button"
+              onClick={() => setZoomOpen(true)}
+              data-sound="click"
+              aria-label={`Zoom into ${item.name} details`}
+              className="group flex items-center gap-2 rounded-md -mx-1 px-1 py-0.5 transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            >
+              <div className="relative w-8 h-8 rounded-md bg-card border border-border flex items-center justify-center overflow-hidden group-hover:border-primary/40 transition-colors">
+                {itemImg
+                  ? <img src={itemImg} alt={item.name} className="w-full h-full object-contain p-0.5" />
+                  : <span className="text-base">{item.icon}</span>}
+                <span className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
+                  <ZoomIn className="w-3.5 h-3.5 text-background opacity-0 group-hover:opacity-100 transition-opacity drop-shadow" />
+                </span>
               </div>
-            </div>
+              <div className="text-left">
+                <div className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
+                  Selected
+                  <ZoomIn className="w-2.5 h-2.5 text-primary/70" aria-hidden />
+                </div>
+                <div className="text-[13px] font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
+                  {item.name}
+                </div>
+              </div>
+            </button>
             <div className="text-[10px] font-mono text-muted-foreground/70">
               4 systems · conflicting definitions
             </div>
@@ -326,6 +318,8 @@ const ClassificationScreen = ({
           </div>
         </div>
       </div>
+
+      <ProductDetailModal item={item} open={zoomOpen} onClose={() => setZoomOpen(false)} />
     </div>
   );
 };
