@@ -22,6 +22,7 @@ import {
   startBeep,
   solutionVictory,
   receiptVictory,
+  teamVictory,
 } from '@/lib/kiosk-audio';
 
 const TRANSITION_MS = 340;
