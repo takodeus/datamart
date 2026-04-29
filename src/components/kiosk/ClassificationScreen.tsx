@@ -30,6 +30,7 @@ const ClassificationScreen = ({
   onUpdateSystem,
 }: ClassificationScreenProps) => {
   const middleScrollRef = useRef<HTMLDivElement | null>(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   // Reset middle-panel scroll on item change.
   useEffect(() => {
