@@ -45,6 +45,13 @@ const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) =>
         setActiveIdx(i => Math.min((images.length || 1) - 1, i + 1));
       } else if (e.key === 'ArrowLeft') {
         setActiveIdx(i => Math.max(0, i - 1));
+      } else if (e.key === '+' || e.key === '=') {
+        setZoomIdx(i => Math.min(ZOOM_LEVELS.length - 1, i + 1));
+      } else if (e.key === '-' || e.key === '_') {
+        setZoomIdx(i => Math.max(0, i - 1));
+        setPan({ x: 0, y: 0 });
+      } else if (e.key === '0') {
+        resetZoom();
       }
     };
     window.addEventListener('keydown', onKey);
