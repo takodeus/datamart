@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FALSE_RESOLUTION_EXCEPTIONS } from '@/lib/kiosk-data';
-import { errorTone } from '@/lib/kiosk-audio';
+
 
 interface FalseResolutionScreenProps {
   onGetHelp: () => void;
@@ -43,8 +43,6 @@ const FalseResolutionScreen = ({ onGetHelp, active }: FalseResolutionScreenProps
     // Stage 1 → 2: pretend the fix worked, then start surfacing exceptions.
     schedule(APPLIED_DELAY, () => {
       setPhase('loading');
-      // Trigger the existing error tone from the kiosk audio library.
-      errorTone();
     });
 
     // Stage 2 → 3: reveal exceptions one by one.

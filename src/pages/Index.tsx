@@ -238,13 +238,7 @@ const Index = () => {
     setMaxReached(1);
   }, [currentScreen]);
 
-  // Per-screen arrival sounds: Solution & Receipt victory chimes still apply.
-  // Screen 3 (False Resolution) plays its own error tone internally.
-  useEffect(() => {
-    if (!soundOnRef.current) return;
-    if (currentScreen === 4) solutionVictory();
-    else if (currentScreen === 6) receiptVictory();
-  }, [currentScreen]);
+  // Per-screen arrival sounds removed — sounds only play on user click.
 
   return (
     <DeviceBezel soundOn={soundOn} onToggleSound={toggleSound} onLock={lockScreen}>
