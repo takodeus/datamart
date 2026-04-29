@@ -183,7 +183,7 @@ const ClassificationScreen = ({
               </div>
               <div className="text-left">
                 <div className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-                  Selected
+                  Click for details
                   <ZoomIn className="w-2.5 h-2.5 text-primary/70" aria-hidden />
                 </div>
                 <div className="text-[13px] font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
