@@ -77,7 +77,8 @@ const Index = () => {
       if (btn.disabled) return;
 
       const sound = btn.dataset.sound;
-      if (sound === 'none' || (!sound && btn.dataset.noClickSound === 'true')) return;
+      // Only play if the button explicitly opted in via data-sound.
+      if (!sound || sound === 'none') return;
 
       switch (sound) {
         case 'click':
