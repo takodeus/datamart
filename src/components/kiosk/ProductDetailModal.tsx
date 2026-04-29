@@ -242,7 +242,7 @@ const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) =>
 
         {/* Footer hint */}
         <div className="px-5 py-2 border-t border-border bg-background/60 text-[10px] font-mono text-muted-foreground/70 text-center">
-          Esc to close · tap image or +/− to zoom
+          Tap image or +/− to zoom
         </div>
       </div>
     </div>
