@@ -1,47 +1,41 @@
-## Restore product zoom / detail view
+## Let users pick the next product themselves
 
-The product data (`src/lib/kiosk-data.ts`) already carries everything a detail view needs — `images: [front, back]`, `description` (ingredients + nutrition), `category`, `price`, and `conflictPrice` — but on the Classification screen the imagery is just a 36px tile in the left list and a 32px thumbnail in the middle header. None of the rich detail is visible. This plan restores a tap-to-zoom detail modal.
+Right now, after a user finishes classifying an item, the selection auto-jumps to the next unclassified product after ~850ms, and the right-panel footer shows a "Next product →" button that walks through items in order. Both of these decide *for* the user. This plan removes the automatic and sequential nudges and replaces them with a clear inline picker that lets the user choose any remaining product.
 
-### What the user will see
+### Behavior changes
 
-- The product thumbnail in the middle-panel header (next to "Selected · {item name}") becomes tappable, with a subtle "Zoom" affordance (magnifier icon + hover ring).
-- The product tiles in the left "Sample Products" list also open the same modal on a second tap of the already-selected item (first tap still just selects).
-- Tapping opens a centered modal with:
-  - Large primary image (front) with thumbnail strip below to switch to the back image.
-  - Product name, category pill, and the canonical `price` with the `conflictPrice` shown crossed-out / muted beside it (matches the existing "two answers" gag).
-  - Description block: the multi-line `description` rendered with line breaks preserved (ingredients, nutrition facts, storage notes).
-  - Close button (X) top-right, click-outside to dismiss, and Esc-to-close.
-- Soft `click` sound on open, `softClick` on close — consistent with existing button-sound router in `Index.tsx` (uses `data-sound`).
+- **Remove auto-advance.** Drop the `useEffect` that schedules `onSelectItem(next)` after the current item is classified. The selection stays where the user put it.
+- **Remove the "Next product →" CTA** from the right-panel footer. It implied a fixed sequence.
+- **Remove `findNextUnclassified` / `goToNext` / `hasNextUnclassified` / `justClassifiedRef`** — no longer needed.
+- **Keep the existing left "Sample Products" list** as the always-available picker. It already shows status dots and is the natural place to pick freely.
+- **Keep the threshold** (`MIN_TO_SUBMIT = 3`) and the "Update System" button in the right-panel footer, restored to a single full-width primary button (its original look).
 
-### Files to add / change
+### New: inline "Pick the next product" panel
 
-1. **New** `src/components/kiosk/ProductDetailModal.tsx`
-   - Props: `item: Item | null`, `open: boolean`, `onClose: () => void`.
-   - Resolves image filenames through a small shared image map.
-   - Local state for `activeImageIdx`. Resets to 0 when `item` changes.
-   - Keyboard: Escape closes; Left/Right arrows switch images when >1.
-   - Layout: 2-column on wide kiosk viewport (image left ~55%, text right ~45%), single column fallback. Reuses existing tokens (`bg-card`, `border-border`, `rounded-xl`, Cherre red accents, `font-mono` for the price/category meta line).
-   - No Radix Dialog needed — a plain fixed overlay matches the kiosk aesthetic and avoids focus-trap quirks inside `DeviceBezel`. (We can use `@/components/ui/dialog` if preferred — flag this in the question below.)
+When the current item is classified and at least one other item is still unclassified, show a small inline picker just below the right-panel footer hint (or replace the hint with it). It contains:
 
-2. **Extract** `src/components/kiosk/itemImages.ts`
-   - Move the `ITEM_IMAGES` map currently inlined at the top of `ClassificationScreen.tsx` into its own module so both `ClassificationScreen` and the new modal import it. No behavior change.
+- A short prompt: "Classified — pick another product to continue."
+- A horizontal row of compact tiles, one per **unclassified** item, showing the thumbnail + name. Each is a button that calls `onSelectItem(idx)`. No fixed order is implied — the user chooses.
+- If every item is classified, replace the picker with the "All items classified. Ready to apply." line that already exists.
 
-3. **Edit** `src/components/kiosk/ClassificationScreen.tsx`
-   - Import the extracted image map and the new modal.
-   - Add `const [zoomOpen, setZoomOpen] = useState(false);`.
-   - Wrap the middle-header thumbnail+name block in a `<button>` (with `data-sound="click"`, `aria-label="Zoom product details"`) that sets `zoomOpen=true`. Add a small magnifier glyph to signal interactivity.
-   - In the left list, when a tile for the already-active item is tapped again, open the modal instead of re-selecting.
-   - Render `<ProductDetailModal item={item} open={zoomOpen} onClose={() => setZoomOpen(false)} />` at the bottom of the component tree.
+This keeps the choice visible right next to the "Update System" CTA, so the user can decide each time whether to keep classifying or submit now.
 
-### Technical notes
+### Footer hint copy
 
-- All static imagery already exists in `src/assets/` (front + back PNGs for all 6 items) and is bundled via `import` — no new assets required.
-- `description` strings use `\n` separators; render with `whitespace-pre-line` like the existing `lookups` cards do.
-- The modal must render *inside* `DeviceBezel` (so it stays within the simulated tablet frame), so it should be a normal child of `ClassificationScreen` using `position: absolute; inset: 0` over the panel — not a React Portal to `document.body`.
-- Keep z-index below the persistent Cherre logo watermark (`z-[100]` in `Index.tsx`) by using `z-50` on the modal overlay, so the brand mark still reads through. Or use `z-[110]` if we want the modal to fully cover — see question below.
+- `< MIN_TO_SUBMIT` classified: "Classify N more product(s) to unlock Update System (X/6 done)."
+- `>= MIN_TO_SUBMIT` and not all done: "X/6 classified — pick another product to continue, or submit now."
+- All done: "All items classified. Ready to apply."
+
+### Files
+
+- `src/components/kiosk/ClassificationScreen.tsx` — only file touched.
+  - Delete: `findNextUnclassified`, `goToNext`, `hasNextUnclassified`, `justClassifiedRef`, the auto-advance `useEffect`.
+  - Add: derived `unclassifiedIndices` (excluding the current item) + `currentDone` boolean.
+  - Footer JSX: drop the "Next product →" button; restore "Update System" to a single full-width primary; render the inline picker tiles when `currentDone && unclassifiedIndices.length > 0`.
+  - Imports: remove `useRef` if no other usage remains; remove `useEffect` if no other usage remains (it is still used for the scroll reset, so keep it).
 
 ### Out of scope
 
-- No data-model changes to `kiosk-data.ts`.
-- No changes to other screens (False Resolution, Resolution, Receipt, etc.).
-- No new sound effects — reuse existing `click` / `softClick` via `data-sound`.
+- No changes to the `Item` data model, the left list, the middle lookups panel, or the ProductDetailModal.
+- No new sounds (the inline tile buttons use the existing `data-sound="click"`).
+- No changes to the threshold or the "Update System" gating logic.

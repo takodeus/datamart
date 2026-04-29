@@ -49,42 +49,10 @@ const ClassificationScreen = ({
   const allClassified = classifiedCount === ITEMS.length;
   const canSubmit = classifiedCount >= MIN_TO_SUBMIT;
   const remainingToUnlock = Math.max(0, MIN_TO_SUBMIT - classifiedCount);
-
-  // Index of the next unclassified item after `from`, wrapping around.
-  // Returns null if every item is classified.
-  const findNextUnclassified = (from: number): number | null => {
-    for (let step = 1; step <= ITEMS.length; step++) {
-      const idx = (from + step) % ITEMS.length;
-      if (!isClassified(classifications[idx])) return idx;
-    }
-    return null;
-  };
-
-  // Auto-advance: when the current item becomes fully classified, jump to the
-  // next unclassified item after a short pause so the user sees the green tick.
-  // Skipped when the user is mid-scroll inside the modal (zoomOpen).
-  const justClassifiedRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (zoomOpen) return;
-    const cur = classifications[currentItem];
-    if (!isClassified(cur)) {
-      justClassifiedRef.current = null;
-      return;
-    }
-    if (justClassifiedRef.current === currentItem) return;
-    justClassifiedRef.current = currentItem;
-    const next = findNextUnclassified(currentItem);
-    if (next === null) return; // everything done — let the user submit
-    const t = setTimeout(() => onSelectItem(next), 850);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classifications, currentItem, zoomOpen]);
-
-  const goToNext = () => {
-    const next = findNextUnclassified(currentItem);
-    if (next !== null) onSelectItem(next);
-  };
-  const hasNextUnclassified = findNextUnclassified(currentItem) !== null;
+  const currentDone = isClassified(classifications[currentItem]);
+  const unclassifiedIndices = ITEMS
+    .map((_, i) => i)
+    .filter(i => i !== currentItem && !isClassified(classifications[i]));
 
   const toggleCategory = (cat: string) => {
     setClassifications(prev => {
