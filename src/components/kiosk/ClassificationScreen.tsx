@@ -41,6 +41,13 @@ const ClassificationScreen = ({
     rightScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentItem]);
 
+  // Close the product detail popup whenever the kiosk resets (welcome / reset btn).
+  useEffect(() => {
+    const onReset = () => setZoomOpen(false);
+    window.addEventListener('kiosk:reset', onReset);
+    return () => window.removeEventListener('kiosk:reset', onReset);
+  }, []);
+
   const item = ITEMS[currentItem];
   const current = classifications[currentItem] ?? { categories: [], aisle: null };
 

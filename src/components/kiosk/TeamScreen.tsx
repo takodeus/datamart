@@ -126,6 +126,13 @@ interface TeamScreenProps {
 const TeamScreen = ({ onContinue }: TeamScreenProps) => {
   const [zoomedMember, setZoomedMember] = useState<TeamMember | null>(null);
 
+  // Close the QR zoom popup whenever the kiosk resets (welcome / reset btn).
+  useEffect(() => {
+    const onReset = () => setZoomedMember(null);
+    window.addEventListener('kiosk:reset', onReset);
+    return () => window.removeEventListener('kiosk:reset', onReset);
+  }, []);
+
   return (
     <div
       className="flex flex-col"
