@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FALSE_RESOLUTION_EXCEPTIONS } from '@/lib/kiosk-data';
-
+import { errorTone } from '@/lib/kiosk-audio';
 
 interface FalseResolutionScreenProps {
   onGetHelp: () => void;
@@ -49,6 +49,7 @@ const FalseResolutionScreen = ({ onGetHelp, active }: FalseResolutionScreenProps
     FALSE_RESOLUTION_EXCEPTIONS.forEach((_, i) => {
       schedule(APPLIED_DELAY + 300 + i * EXCEPTION_STAGGER, () => {
         setRevealedCount(i + 1);
+        errorTone();
         if (i === 0) setPhase('revealing');
       });
     });

@@ -22,6 +22,7 @@ import {
   startBeep,
   solutionVictory,
   receiptVictory,
+  teamVictory,
 } from '@/lib/kiosk-audio';
 
 const TRANSITION_MS = 340;
@@ -284,7 +285,13 @@ const Index = () => {
     setMaxReached(1);
   }, [currentScreen]);
 
-  // Per-screen arrival sounds removed — sounds only play on user click.
+  // Play arrival victory sounds when reaching screens 4, 5, 6.
+  useEffect(() => {
+    if (!soundOnRef.current) return;
+    if (currentScreen === 4) solutionVictory();
+    else if (currentScreen === 5) teamVictory();
+    else if (currentScreen === 6) receiptVictory();
+  }, [currentScreen]);
 
   return (
     <DeviceBezel soundOn={soundOn} onToggleSound={toggleSound} onLock={lockScreen}>
