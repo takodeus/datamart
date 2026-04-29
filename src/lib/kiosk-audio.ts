@@ -103,6 +103,16 @@ export const receiptVictory = () =>
     { f: 1568, d: 0.2, t: 'triangle', v: 0.22, gap: 0.08 },
   ]);
 
+// Warm, human "team" fanfare — sine wave, four-note major arpeggio with
+// a gentle resolved feel. Distinct from the bright triangle victories.
+export const teamVictory = () =>
+  playSequence([
+    { f: 587, d: 0.12, t: 'sine', v: 0.22 },
+    { f: 740, d: 0.12, t: 'sine', v: 0.22, gap: 0.09 },
+    { f: 880, d: 0.12, t: 'sine', v: 0.22, gap: 0.09 },
+    { f: 1109, d: 0.22, t: 'sine', v: 0.24, gap: 0.09 },
+  ]);
+
 export const clickBeep = () => playInstant(900, 0.06, 'square', 0.1);
 // Very subtle, quiet UI click — used as a global button-press feedback.
 export const softClick = () => playInstant(2400, 0.02, 'sine', 0.04);
