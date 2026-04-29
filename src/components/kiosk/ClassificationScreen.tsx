@@ -312,7 +312,7 @@ const ClassificationScreen = ({
             {currentDone && unclassifiedIndices.length > 0 && (
               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground px-1">
                 <span aria-hidden className="text-primary font-bold">←</span>
-                <span>Nice — now pick another product from the list on the left.</span>
+                <span>Choose next product to update.</span>
               </div>
             )}
             <button
