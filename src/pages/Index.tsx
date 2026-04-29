@@ -27,6 +27,7 @@ import {
 const TRANSITION_MS = 340;
 const SCREEN_MIN = 1;
 const SCREEN_MAX = 6;
+const TAP_MOVE_TOLERANCE_PX = 8;
 
 function clampScreen(v: string | null): number {
   const n = parseInt(v ?? '', 10);
@@ -59,6 +60,13 @@ const Index = () => {
   const transitioning = useRef(false);
   const internalNavRef = useRef(0);
   const soundOnRef = useRef(true);
+  const soundGestureRef = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+    moved: boolean;
+    button: HTMLButtonElement | null;
+  } | null>(null);
 
   useEffect(() => {
     soundOnRef.current = soundOn;
@@ -66,16 +74,41 @@ const Index = () => {
   }, [soundOn]);
 
   // Global button sound router.
-  // Fires on `click` (not `pointerdown`) so sounds only play when the user
-  // truly selects a button — gestures that begin on a button but turn into
-  // a scroll/drag are filtered out by the browser's click semantics.
+  // Tracks the pointer gesture so scroll/drag motions that still synthesize a
+  // browser click do not play a sound.
   useEffect(() => {
+    const markMoved = () => {
+      if (soundGestureRef.current) soundGestureRef.current.moved = true;
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      soundGestureRef.current = {
+        pointerId: e.pointerId,
+        x: e.clientX,
+        y: e.clientY,
+        moved: false,
+        button: target?.closest('button') as HTMLButtonElement | null,
+      };
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const gesture = soundGestureRef.current;
+      if (!gesture || gesture.pointerId !== e.pointerId) return;
+      const distance = Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y);
+      if (distance > TAP_MOVE_TOLERANCE_PX) gesture.moved = true;
+    };
+
     const handler = (e: MouseEvent) => {
       if (!soundOnRef.current) return;
       const target = e.target as HTMLElement | null;
       const btn = target?.closest('button') as HTMLButtonElement | null;
       if (!btn) return;
       if (btn.disabled) return;
+
+      const gesture = soundGestureRef.current;
+      if (gesture?.moved) return;
+      if (gesture?.button && gesture.button !== btn) return;
 
       const sound = btn.dataset.sound;
       // Only play if the button explicitly opted in via data-sound.
@@ -104,8 +137,19 @@ const Index = () => {
           softClick();
       }
     };
+
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointermove', onPointerMove, true);
+    document.addEventListener('pointercancel', markMoved, true);
+    document.addEventListener('scroll', markMoved, true);
     document.addEventListener('click', handler, true);
-    return () => document.removeEventListener('click', handler, true);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('pointermove', onPointerMove, true);
+      document.removeEventListener('pointercancel', markMoved, true);
+      document.removeEventListener('scroll', markMoved, true);
+      document.removeEventListener('click', handler, true);
+    };
   }, []);
 
   const pushParams = useCallback((screen: number, item: number) => {
