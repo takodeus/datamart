@@ -104,8 +104,8 @@ const Index = () => {
           softClick();
       }
     };
-    document.addEventListener('pointerdown', handler, true);
-    return () => document.removeEventListener('pointerdown', handler, true);
+    document.addEventListener('click', handler, true);
+    return () => document.removeEventListener('click', handler, true);
   }, []);
 
   const pushParams = useCallback((screen: number, item: number) => {
