@@ -106,11 +106,11 @@ const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) =>
         </div>
 
         {/* Body — 2 cols */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-[55%_45%] min-h-0 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-[65%_35%] min-h-0 overflow-hidden">
           {/* Image area */}
           <div className="bg-background flex flex-col border-b md:border-b-0 md:border-r border-border relative">
             <div
-              className={`flex-1 min-h-[260px] flex items-center justify-center p-6 overflow-hidden select-none ${
+              className={`flex-1 min-h-[420px] flex items-center justify-center p-2 overflow-hidden select-none ${
                 isZoomed ? 'cursor-grab active:cursor-grabbing' : activeImg ? 'cursor-zoom-in' : ''
               }`}
               onPointerDown={(e) => {
@@ -143,7 +143,7 @@ const ProductDetailModal = ({ item, open, onClose }: ProductDetailModalProps) =>
                   src={activeImg}
                   alt={`${item.name} ${activeIdx === 0 ? 'front' : 'back'}`}
                   draggable={false}
-                  className="max-w-full max-h-[380px] object-contain transition-transform duration-150 ease-out will-change-transform pointer-events-none"
+                  className="max-w-full max-h-full w-full h-full object-contain transition-transform duration-150 ease-out will-change-transform pointer-events-none"
                   style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
                 />
               ) : (
