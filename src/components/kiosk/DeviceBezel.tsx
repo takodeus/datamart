@@ -11,7 +11,7 @@ const DeviceBezel = ({ children, soundOn, onToggleSound, onLock }: DeviceBezelPr
   return (
     <div className="w-full h-full flex items-center justify-center bg-muted/30 p-4 md:p-8">
       {/* Outer bezel shell */}
-      <div className="relative w-full h-full max-w-[1100px] max-h-[750px] rounded-[2rem] bg-foreground/90 p-[10px] shadow-[0_20px_80px_-20px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)_inset]">
+      <div className="relative w-full h-full max-w-[1400px] max-h-[950px] rounded-[2rem] bg-foreground/90 p-[10px] shadow-[0_20px_80px_-20px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.05)_inset]">
         {/* Inner bezel rim */}
         <div className="w-full h-full rounded-[1.5rem] overflow-hidden bg-background relative shadow-[inset_0_2px_8px_rgba(0,0,0,0.15)]">
           {/* Status bar */}
