@@ -51,7 +51,7 @@ const ClassificationScreen = ({
   const item = ITEMS[currentItem];
   const current = classifications[currentItem] ?? { categories: [], aisle: null };
 
-  const MIN_TO_SUBMIT = 3;
+  const MIN_TO_SUBMIT = 2;
 
   const classifiedCount = useMemo(
     () => ITEMS.filter((_, i) => isClassified(classifications[i])).length,
